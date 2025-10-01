@@ -3,28 +3,43 @@ name: Build Skyblock-2.0
 on:
   push:
     branches:
-      - master
-  pull_request:
+      - master   # or main depending on your default branch
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
+      # 1. Checkout your repo
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up JDK
+      # 2. Set up Java 21 (compatible with skyblock-2.0)
+      - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
+          cache: maven
 
-      - name: Build with Maven
+      # 3. Install system-scoped plugin jars locally
+      - name: Install Plugin JARs
+        run: |
+          mvn install:install-file -Dfile=dependencies/plugins/item-nbt-api-plugin-2.6.0.jar -DgroupId=de.tr7zw -DartifactId=item-nbt-api-plugin -Dversion=2.6.0 -Dpackaging=jar
+          mvn install:install-file -Dfile=dependencies/plugins/ActionBarAPI-1.5.4.jar -DgroupId=com.connorlinfoot -DartifactId=actionbarapi -Dversion=1.5.4 -Dpackaging=jar
+          mvn install:install-file -Dfile=dependencies/plugins/ArmorEventPlugin.jar -DgroupId=com.inkzzz -DartifactId=armoreventplugin -Dversion=1.4 -Dpackaging=jar
+          mvn install:install-file -Dfile=dependencies/plugins/worldedit-bukkit-6.1.jar -DgroupId=com.sk89q -DartifactId=worldedit-bukkit -Dversion=6.1.0 -Dpackaging=jar
+          mvn install:install-file -Dfile=dependencies/plugins/Citizens-2.0.30-b2765.jar -DgroupId=net.citizensnpcs -DartifactId=citizensapi -Dversion=2.0.30-b2765 -Dpackaging=jar
+
+      # 4. Build with Maven
+      - name: Build Plugin
         run: mvn clean package
 
+      # 5. Upload the built plugin as an artifact
       - name: Upload JAR Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: skyblock-2.0-jar
+          name: skyblock-2.0
           path: target/*.jar
           
