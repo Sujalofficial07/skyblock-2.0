@@ -32,6 +32,17 @@ jobs:
           mvn install:install-file -Dfile=dependencies/plugins/worldedit-bukkit-6.1.jar -DgroupId=com.sk89q -DartifactId=worldedit-bukkit -Dversion=6.1.0 -Dpackaging=jar
           mvn install:install-file -Dfile=dependencies/plugins/Citizens-2.0.30-b2765.jar -DgroupId=net.citizensnpcs -DartifactId=citizensapi -Dversion=2.0.30-b2765 -Dpackaging=jar
 
+      - name: Build Spigot 1.8.8 locally
+        run: |
+          wget https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+          java -jar BuildTools.jar --rev 1.8.8
+          mvn install:install-file \
+          -Dfile=spigot-1.8.8-R0.1-SNAPSHOT.jar \
+          -DgroupId=org.spigotmc \
+          -DartifactId=spigot \
+          -Dversion=1.8.8-R0.1-SNAPSHOT \
+          -Dpackaging=jar
+
       # 4. Build with Maven
       - name: Build Plugin
         run: mvn clean package
